@@ -266,10 +266,7 @@ p {
 }
 
 .result-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 178px;
-  gap: 22px;
-  align-items: center;
+  display: block;
   padding-bottom: 22px;
   border-bottom: 1px solid var(--line);
 }
@@ -287,50 +284,6 @@ p {
   font-size: 1.05rem;
   font-weight: 760;
   line-height: 1.55;
-}
-
-.result-badge {
-  display: grid;
-  place-items: end center;
-  position: relative;
-  width: 178px;
-  height: 214px;
-  border-radius: 30px;
-  color: var(--avatar-color, var(--green));
-  background: linear-gradient(180deg, #faf8fb 0%, #f1eef3 100%);
-  box-shadow: inset 0 0 0 1px #e8e2ea;
-  font-size: 1.1rem;
-  font-weight: 950;
-  padding-bottom: 16px;
-}
-
-.result-badge::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 24px;
-  width: 104px;
-  height: 138px;
-  transform: translateX(-50%);
-  background:
-    linear-gradient(140deg, rgba(255, 255, 255, 0.72) 0 18%, transparent 19%),
-    linear-gradient(30deg, rgba(45, 45, 52, 0.72) 0 28%, transparent 29%),
-    linear-gradient(150deg, var(--avatar-color, var(--green)) 0 66%, transparent 67%);
-  clip-path: polygon(50% 0, 76% 10%, 94% 34%, 82% 100%, 18% 100%, 6% 34%, 24% 10%);
-}
-
-.result-badge::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 74px;
-  width: 66px;
-  height: 52px;
-  transform: translateX(-50%);
-  background:
-    linear-gradient(90deg, transparent 0 30%, #2d2b2f 31% 36%, transparent 37% 63%, #2d2b2f 64% 69%, transparent 70%),
-    linear-gradient(135deg, #efd3bd 0 50%, #d6a88d 51% 100%);
-  clip-path: polygon(18% 0, 82% 0, 100% 55%, 50% 100%, 0 55%);
 }
 
 .result-grid {
@@ -526,39 +479,11 @@ p {
 }
 
 .persona-card {
-  display: grid;
-  grid-template-columns: 54px 1fr;
-  gap: 12px;
   min-height: 116px;
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 12px;
   background: #fff;
-}
-
-.persona-avatar {
-  display: grid;
-  place-items: end center;
-  position: relative;
-  width: 54px;
-  height: 76px;
-  border-radius: 18px;
-  color: var(--card-color, var(--green));
-  background: var(--card-bg, var(--green-soft));
-  font-size: 0.68rem;
-  font-weight: 950;
-  padding-bottom: 8px;
-}
-
-.persona-avatar::before {
-  content: "";
-  position: absolute;
-  top: 11px;
-  width: 32px;
-  height: 42px;
-  background: currentColor;
-  clip-path: polygon(50% 0, 82% 16%, 96% 42%, 74% 100%, 25% 100%, 4% 42%, 18% 16%);
-  opacity: 0.88;
 }
 
 .persona-card h3 {
@@ -572,26 +497,6 @@ p {
   font-size: 0.86rem;
   font-weight: 700;
   line-height: 1.45;
-}
-
-body[data-persona-group="euro"] {
-  --avatar-color: var(--purple);
-}
-
-body[data-persona-group="party"] {
-  --avatar-color: var(--green);
-}
-
-body[data-persona-group="epic"] {
-  --avatar-color: var(--blue);
-}
-
-body[data-persona-group="life"] {
-  --avatar-color: var(--gold);
-}
-
-body[data-persona-group="special"] {
-  --avatar-color: var(--red);
 }
 
 @keyframes pop-in {
@@ -652,15 +557,8 @@ body[data-persona-group="special"] {
     height: 36px;
   }
 
-  .result-hero,
   .result-grid {
     display: block;
-  }
-
-  .result-badge {
-    width: 150px;
-    height: 182px;
-    margin-top: 16px;
   }
 
   .result-block {

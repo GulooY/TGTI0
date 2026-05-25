@@ -137,8 +137,8 @@ const personas = [
     id: "TALK",
     name: "嘴炮王",
     title: "嘴炮王 TALK",
-    tags: ["TALK", "BASH"],
-    weights: { TALK: 5, BASH: 2, LOOP: 1 },
+    tags: ["TALK", "LOOP", "MEME"],
+    weights: { TALK: 5, LOOP: 1, MEME: 1 },
     subtitle: "身份局见到你，空气都会变浑。你坐下以后，游戏人数自动加一。",
     symptoms: ["发言阶段像开发布会", "能把普通交易讲成战略合作", "沉默玩家会被你点名唤醒"],
     guide: "给他谈判、身份、结盟空间，他会把桌面变成小型联合国。",
@@ -344,6 +344,11 @@ const dimensionConfig = [
   { id: "social", name: "社交整活", tags: ["PARTY", "MEME", "TALK", "EPIC", "BARD", "DOOM", "CARE", "GO"] },
   { id: "life", name: "桌游生态", tags: ["PLEDGE", "DUST", "PLAN", "FREE", "ANY", "SHINE", "GHOST"] },
 ];
+
+const anchorPersonas = {
+  TALK: 22,
+  GHOST: 18,
+};
 
 const questions = [
   {
@@ -1147,7 +1152,6 @@ const refs = {
   progressBar: document.querySelector("#progressBar"),
   resultTitle: document.querySelector("#resultTitle"),
   resultSubtitle: document.querySelector("#resultSubtitle"),
-  resultBadge: document.querySelector("#resultBadge"),
   resultStory: document.querySelector("#resultStory"),
   dimensionStats: document.querySelector("#dimensionStats"),
   symptomList: document.querySelector("#symptomList"),
@@ -1229,28 +1233,95 @@ function addScores(scores) {
   });
 }
 
+const personaMaxScores = calculatePersonaMaxScores();
+
 function scorePersona(persona) {
-  const weighted = Object.entries(persona.weights).reduce((sum, [tag, weight]) => {
-    return sum + (state.scores[tag] || 0) * weight;
-  }, 0);
-  const direct = (state.scores[persona.id] || 0) * 5;
-  const varietyBonus = persona.tags.filter((tag) => (state.scores[tag] || 0) > 0).length * 2;
-  const thresholdBonus = getThresholdBonus(persona.id, state.scores[persona.id] || 0);
-  return weighted + direct + varietyBonus + thresholdBonus;
+  const directScore = state.scores[persona.id] || 0;
+  const maxDirect = personaMaxScores[persona.id] || 1;
+  const directRatio = Math.min(directScore / maxDirect, 1);
+  const directCore = directRatio * 100;
+  const affinity = getAffinityScore(persona);
+  const anchorBonus = getAnchorBonus(persona.id, directRatio, state.scores);
+  const thresholdBonus = getThresholdBonus(persona.id, directScore, directRatio);
+  return directCore + affinity + anchorBonus + thresholdBonus;
 }
 
-function getThresholdBonus(id, score) {
-  if (score >= 18) {
-    return 36;
+function getAffinityScore(persona) {
+  return persona.tags.reduce((sum, tag) => {
+    if (tag === persona.id) {
+      return sum;
+    }
+    const maxTag = personaMaxScores[tag] || 1;
+    const ratio = Math.min((state.scores[tag] || 0) / maxTag, 1);
+    return sum + ratio * 10;
+  }, 0);
+}
+
+function calculatePersonaMaxScores() {
+  const maxScores = {};
+  personas.forEach((persona) => {
+    maxScores[persona.id] = 0;
+  });
+  questions.forEach((question) => {
+    addBestOptionScores(maxScores, question);
+  });
+  Object.values(followUps).forEach((question) => {
+    addBestOptionScores(maxScores, question);
+  });
+  return maxScores;
+}
+
+function addBestOptionScores(maxScores, question) {
+  Object.keys(maxScores).forEach((id) => {
+    const best = Math.max(
+      0,
+      ...question.options.map((option) => option.scores[id] || 0),
+    );
+    maxScores[id] += best;
+  });
+}
+
+function getThresholdBonus(id, score, ratio) {
+  if (["BASH", "GHOST"].includes(id) && ratio >= 0.72) {
+    return 38;
   }
-  if (score >= 14) {
-    return 22;
+  if (["BASH", "GHOST"].includes(id) && ratio >= 0.58) {
+    return 26;
   }
-  if (score >= 10) {
-    return 12;
+  if (id === "TALK" && ratio >= 0.72) {
+    return 30;
   }
-  if (["LOOP", "CARE", "LUCK", "CARDS", "LASER", "BARD", "DOOM", "GHOST", "DUST", "SHINE", "ANY", "FREE"].includes(id) && score >= 8) {
-    return 10;
+  if (id === "TALK" && ratio >= 0.58) {
+    return 20;
+  }
+  if (ratio >= 0.72) {
+    return 24;
+  }
+  if (ratio >= 0.58) {
+    return 14;
+  }
+  if (ratio >= 0.45) {
+    return 7;
+  }
+  if (["GO", "LOOP", "THINK", "EPIC", "DICE", "LUCK", "MEME", "TALK", "CARE", "ANY", "PLEDGE", "PLAN", "GHOST", "GEEK", "BARD", "DOOM", "LASER", "CARDS"].includes(id) && ratio >= 0.36 && score >= 6) {
+    return 6;
+  }
+  return 0;
+}
+
+function getAnchorBonus(id, ratio, scores) {
+  const bonus = anchorPersonas[id] || 0;
+  if (id === "TALK") {
+    const bashRatio = Math.min((scores.BASH || 0) / (personaMaxScores.BASH || 1), 1);
+    if (bashRatio >= 0.72) {
+      return 0;
+    }
+  }
+  if (ratio >= 0.72) {
+    return bonus;
+  }
+  if (ratio >= 0.58) {
+    return bonus * 0.55;
   }
   return 0;
 }
@@ -1285,7 +1356,6 @@ function showResult() {
   refs.resultSubtitle.textContent = isClose
     ? `${winner.subtitle} 但你体内还住着一个 ${runner.title}，两种桌面人格正在反复横跳。`
     : winner.subtitle;
-  refs.resultBadge.textContent = winner.id;
   refs.resultStory.textContent = personaStories[winner.id] || winner.subtitle;
   refs.dimensionStats.innerHTML = renderDimensionStats();
   refs.symptomList.innerHTML = winner.symptoms.map((item) => `<li>${item}</li>`).join("");
@@ -1346,7 +1416,6 @@ function renderOverview() {
       const meta = personaGroupMeta[group];
       return `
         <article class="persona-card" style="--card-color: ${meta.color}; --card-bg: ${meta.bg}">
-          <div class="persona-avatar">${persona.id}</div>
           <div>
             <h3>${persona.name} ${persona.id}</h3>
             <p>${persona.subtitle}</p>
