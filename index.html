@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TGTI 桌游人格测试</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="logo" href="#" aria-label="TGTI 首页">
+        <span class="logo-mark" aria-hidden="true">T</span>
+        <span>TGTI</span>
+      </a>
+      <button id="overviewButton" class="overview-button" type="button" aria-haspopup="dialog">
+        类型总览
+      </button>
+    </header>
+
+    <main class="app-shell">
+      <section class="hero-copy">
+        <p class="eyebrow">Tabletop Gamer Type Indicator</p>
+        <h1>测测你是哪种桌游人格</h1>
+        <p>
+          36 道桌游事故现场，测出你的主人格、副人格、风味标签和维度占比。
+          规则神、毛战神、跑团吟游、众筹僧，都在等一个自我认领。
+        </p>
+      </section>
+
+      <section class="quiz-panel" aria-live="polite">
+        <div class="progress-wrap" aria-label="答题进度">
+          <div class="progress-meta">
+            <span id="phaseLabel">分流题</span>
+            <span id="progressLabel">1 / 36</span>
+          </div>
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <article id="questionCard" class="question-card">
+          <p id="questionKicker" class="question-kicker"></p>
+          <h2 id="questionText"></h2>
+          <div id="options" class="options-grid"></div>
+        </article>
+
+        <section id="resultPanel" class="result-panel" hidden>
+          <div class="result-hero">
+            <div>
+              <p class="eyebrow">你的 TGTI 主人格</p>
+              <h2 id="resultTitle"></h2>
+              <p id="resultSubtitle" class="result-subtitle"></p>
+            </div>
+            <div id="resultBadge" class="result-badge"></div>
+          </div>
+
+          <div class="result-block dimension-block">
+            <h3>维度占比</h3>
+            <div id="dimensionStats" class="dimension-stats"></div>
+          </div>
+
+          <div class="result-grid">
+            <div class="result-block">
+              <h3>桌面症状</h3>
+              <ul id="symptomList"></ul>
+            </div>
+            <div class="result-block">
+              <h3>队友说明书</h3>
+              <p id="teamGuide"></p>
+            </div>
+            <div class="result-block">
+              <h3>雷区提醒</h3>
+              <p id="dangerZone"></p>
+            </div>
+            <div class="result-block">
+              <h3>风味标签</h3>
+              <div id="tagCloud" class="tag-cloud"></div>
+            </div>
+          </div>
+
+          <div class="share-strip">
+            <p id="shareText"></p>
+            <div class="action-row">
+              <button id="restartButton" class="secondary-button" type="button">重测一局</button>
+              <button id="copyButton" class="primary-button" type="button">复制结果</button>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div id="overviewOverlay" class="overview-overlay" hidden>
+      <section class="overview-dialog" role="dialog" aria-modal="true" aria-labelledby="overviewTitle">
+        <div class="overview-head">
+          <div>
+            <p class="eyebrow">TGTI Type Atlas</p>
+            <h2 id="overviewTitle">人格类型总览</h2>
+          </div>
+          <button id="closeOverviewButton" class="close-button" type="button" aria-label="关闭">×</button>
+        </div>
+        <div id="overviewGrid" class="overview-grid"></div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
