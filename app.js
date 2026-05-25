@@ -347,75 +347,75 @@ const dimensionConfig = [
 
 const questions = [
   {
-    phase: "开场题",
-    text: "今晚只能选一种快乐：",
+    phase: "主测试",
+    text: "今晚桌游店只剩一个空桌，你最想把它开成：",
     options: [
-      o("德式跑分", { EURO: 1, SCORE: 1 }),
-      o("美式互车", { EPIC: 1, BASH: 1 }),
-      o("毛线爆笑", { PARTY: 1, MEME: 1 }),
-      o("跑团入戏", { BARD: 1, DOOM: 1 }),
-      o("战棋量尺", { LASER: 1, RULE: 1 }),
-      o("卡牌构筑", { CARDS: 1, LUCK: 1 }),
+      o("资源转换精密到能听见脑子转的德式局。", { EURO: 3, SCORE: 1 }),
+      o("模型铺满、骰子乱飞、友情暂时下线的美式局。", { EPIC: 3, BASH: 1 }),
+      o("规则三分钟、笑声三小时的毛线局。", { PARTY: 3, MEME: 1 }),
+      o("一开口就是世界观，今晚先别睡的跑团局。", { BARD: 3, DOOM: 1 }),
+      o("尺子、视线、掩体都要严谨的战棋局。", { LASER: 3, RULE: 1 }),
+      o("构筑、牌序、斩杀线全都在线的卡牌局。", { CARDS: 3, LUCK: 1 }),
     ],
   },
   {
-    phase: "开场题",
-    text: "你在桌游群里的生态位：",
+    phase: "主测试",
+    text: "群里说“今晚谁来负责一下”，你最可能接过哪部分：",
     options: [
-      o("讲规 / 主持", { HOST: 1, RULE: 1 }),
-      o("组局 / 排期", { PLAN: 1, HOST: 1 }),
-      o("买盒 / 众筹", { PLEDGE: 1, DUST: 1 }),
-      o("蹭局 / 随叫随到", { FREE: 1, ANY: 1 }),
-      o("气氛 / 烂梗", { MEME: 1, PARTY: 1 }),
-      o("查分 / 研究", { GEEK: 1, EURO: 1 }),
+      o("我来讲规和控流程，别让新人坐牢。", { HOST: 3, RULE: 1, CARE: 1 }),
+      o("我来约人排期，谁鸽我记小本。", { PLAN: 3, HOST: 1 }),
+      o("我带盒，别问开没开过。", { PLEDGE: 2, DUST: 2 }),
+      o("你们决定，我人到就行。", { FREE: 3, ANY: 1 }),
+      o("我负责气氛和烂梗，沉默局不许存在。", { MEME: 3, PARTY: 1 }),
+      o("我先查评分、人数和评论区雷点。", { GEEK: 3, EURO: 1 }),
     ],
   },
   {
-    phase: "开场题",
-    text: "你最容易破防：",
+    phase: "主测试",
+    text: "一局游戏里，最能让你当场血压变化的是：",
     options: [
-      o("规则被玩错", { RULE: 1 }),
-      o("队友长考", { PARTY: 1, HOST: 1 }),
-      o("骰子背刺", { DICE: 1 }),
-      o("朋友鸽局", { PLAN: 1, GHOST: 1 }),
-      o("太没互动", { TALK: 1 }),
-      o("结算才发现自己输了", { SCORE: 1 }),
+      o("规则被玩错，还说“差不多吧”。", { RULE: 3, LOOP: 1 }),
+      o("队友长考到我开始怀疑时间。", { PARTY: 2, HOST: 1 }),
+      o("骰子在关键时刻精准背刺。", { DICE: 3 }),
+      o("朋友临开局说“我突然”。", { PLAN: 2, GHOST: 2 }),
+      o("全桌没人说话，像在集体上班。", { TALK: 3, PARTY: 1 }),
+      o("结算才发现自己被悄悄拉开 20 分。", { SCORE: 3 }),
     ],
   },
   {
-    phase: "开场题",
-    text: "你最愿意为桌游牺牲：",
+    phase: "主测试",
+    text: "如果今晚这局必须付出一点代价，你最能接受牺牲：",
     options: [
-      o("钱包", { PLEDGE: 1 }),
-      o("睡眠", { BARD: 1, EPIC: 1 }),
-      o("友情", { BASH: 1 }),
-      o("脑细胞", { EURO: 1, THINK: 1 }),
-      o("形象", { MEME: 1 }),
-      o("柜子空间", { DUST: 1 }),
+      o("钱包。豪华版都点了，还差这一点吗。", { PLEDGE: 3 }),
+      o("睡眠。剧情开了就没有自然结束。", { BARD: 2, EPIC: 1 }),
+      o("友情。互车完明天再修复关系。", { BASH: 3 }),
+      o("脑细胞。路线复杂才说明今晚值了。", { EURO: 2, THINK: 2 }),
+      o("形象。只要好笑，我可以不要包袱。", { MEME: 3 }),
+      o("柜子空间。反正总能再挤一盒。", { DUST: 3, PLEDGE: 1 }),
     ],
   },
   {
-    phase: "开场题",
-    text: "朋友最可能说你：",
+    phase: "主测试",
+    text: "朋友复盘你这个人，最可能给你贴的标签是：",
     options: [
-      o("他会教。", { HOST: 1 }),
-      o("他会赢。", { SCORE: 1 }),
-      o("他会买。", { PLEDGE: 1 }),
-      o("他会嘴。", { TALK: 1 }),
-      o("他会鸽。", { GHOST: 1 }),
-      o("他什么都玩。", { ANY: 1 }),
+      o("他会教，复杂游戏到他嘴里都能落地。", { HOST: 3, CARE: 1 }),
+      o("他会赢，安静半局结算突然起飞。", { SCORE: 3 }),
+      o("他会买，群里新品消息基本来自他。", { PLEDGE: 3, DUST: 1 }),
+      o("他会嘴，身份局空气都被他说浑。", { TALK: 3, LOOP: 1 }),
+      o("他会鸽，报名时很热血，开局前很神秘。", { GHOST: 4 }),
+      o("他什么都玩，只要有局就有他。", { ANY: 3, FREE: 1 }),
     ],
   },
   {
-    phase: "开场题",
-    text: "如果你变成一张桌游配件：",
+    phase: "主测试",
+    text: "如果你变成一张桌游配件，你觉得自己最像：",
     options: [
-      o("米宝", { EURO: 1, SHINE: 1 }),
-      o("骰子", { DICE: 1, EPIC: 1 }),
-      o("规则书", { RULE: 1 }),
-      o("金属币", { PLEDGE: 1, SHINE: 1 }),
-      o("调查员卡", { DOOM: 1 }),
-      o("尺子", { LASER: 1 }),
+      o("米宝。朴素但核心，放哪都能开工。", { EURO: 2, SHINE: 1 }),
+      o("骰子。命运由我滚出来，别问公不公平。", { DICE: 2, EPIC: 1 }),
+      o("规则书。没有我你们迟早出事。", { RULE: 3 }),
+      o("金属币。贵一点，但手感真的不一样。", { PLEDGE: 2, SHINE: 2 }),
+      o("调查员卡。理智值只是剧情燃料。", { DOOM: 3, BARD: 1 }),
+      o("尺子。差一毫米都不是同一个世界。", { LASER: 3 }),
     ],
   },
   {
@@ -424,7 +424,7 @@ const questions = [
     options: [
       o("“我先读，大家别碰组件。”", { RULE: 2, HOST: 1 }),
       o("“摆上吧，玩错算教学局。”", { GO: 2, PARTY: 1 }),
-      o("“GEEK 权重多少？有没有教学视频？”", { GEEK: 2 }),
+      o("“BGG 评分多少？有没有教学视频？”", { GEEK: 2 }),
       o("“这收纳不行，我先分 token。”", { SHINE: 2 }),
     ],
   },
@@ -546,16 +546,6 @@ const questions = [
       o("最好别太随机，我想动脑。", { EURO: 2 }),
       o("最好能互车，我今天情绪很好。", { EPIC: 1, BASH: 2 }),
       o("最好别超过 20 分钟，我是来笑的。", { PARTY: 3 }),
-    ],
-  },
-  {
-    phase: "主测试",
-    text: "看到 GEEK 权重 4.2：",
-    options: [
-      o("兴奋，说明有东西。", { EURO: 2, GEEK: 2 }),
-      o("先收藏，等一个成熟的讲规者。", { FREE: 1, GEEK: 2 }),
-      o("劝退，我今晚不是来考研的。", { PARTY: 2 }),
-      o("看评论区有没有规则争议。", { RULE: 1, GEEK: 2 }),
     ],
   },
   {
@@ -1184,7 +1174,7 @@ function renderQuestion() {
     ? `追问 / ${questions.length}`
     : `${state.index + 1} / ${questions.length}`;
   refs.progressBar.style.width = `${(state.index / questions.length) * 100}%`;
-  refs.questionKicker.textContent = question.phase === "开场题" ? "轻量开场" : "桌游事故现场";
+  refs.questionKicker.textContent = "桌游事故现场";
   if (question.phase === "追问题") {
     refs.questionKicker.textContent = "折叠追问";
   }
