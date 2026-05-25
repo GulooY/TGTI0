@@ -213,6 +213,8 @@ p {
   text-align: left;
   background: #fff;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   transition:
     transform 140ms ease,
     box-shadow 140ms ease,
@@ -220,13 +222,25 @@ p {
     background 140ms ease;
 }
 
-.option-button:hover,
 .option-button:focus-visible {
   transform: translateY(-3px);
   border-color: #b9d8b4;
   box-shadow: 0 14px 28px rgba(79, 143, 77, 0.13);
   outline: none;
   background: var(--green-soft);
+}
+
+.option-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .option-button:hover {
+    transform: translateY(-3px);
+    border-color: #b9d8b4;
+    box-shadow: 0 14px 28px rgba(79, 143, 77, 0.13);
+    background: var(--green-soft);
+  }
 }
 
 .option-letter {
@@ -336,6 +350,18 @@ p {
 .dimension-block {
   margin: 18px 0 0;
   background: linear-gradient(180deg, #fbfff9 0%, #ffffff 100%);
+}
+
+.story-block {
+  margin: 14px 0 0;
+  background: linear-gradient(180deg, #fffef8 0%, #ffffff 100%);
+}
+
+.story-block p {
+  margin-bottom: 0;
+  color: #3d3940;
+  font-weight: 720;
+  line-height: 1.8;
 }
 
 .result-block h3 {
