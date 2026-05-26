@@ -1139,6 +1139,7 @@ const state = {
   scores: {},
   answers: [],
   pendingQuestions: [],
+  result: null,
 };
 
 const refs = {
@@ -1350,14 +1351,16 @@ function showResult() {
   const runner = ranked[1];
   const isClose = runner && winner.score > 0 && (winner.score - runner.score) / winner.score <= 0.05;
   const topTags = getTopTags();
+  const resultSubtitle = isClose
+    ? `${winner.subtitle} 但你体内还住着一个 ${runner.title}，两种桌面人格正在反复横跳。`
+    : winner.subtitle;
+  const dimensions = getDimensionStats();
 
   document.body.dataset.personaGroup = getPersonaGroup(winner);
   refs.resultTitle.textContent = winner.title;
-  refs.resultSubtitle.textContent = isClose
-    ? `${winner.subtitle} 但你体内还住着一个 ${runner.title}，两种桌面人格正在反复横跳。`
-    : winner.subtitle;
+  refs.resultSubtitle.textContent = resultSubtitle;
   refs.resultStory.textContent = personaStories[winner.id] || winner.subtitle;
-  refs.dimensionStats.innerHTML = renderDimensionStats();
+  refs.dimensionStats.innerHTML = renderDimensionStats(dimensions);
   refs.symptomList.innerHTML = winner.symptoms.map((item) => `<li>${item}</li>`).join("");
   refs.teamGuide.textContent = winner.guide;
   refs.dangerZone.textContent = winner.danger;
@@ -1365,6 +1368,15 @@ function showResult() {
 
   const secondary = isClose ? `，副人格 ${runner.title}` : "";
   refs.shareText.textContent = `我是 TGTI ${winner.title}${secondary}。${winner.subtitle}`;
+  state.result = {
+    winner,
+    runner: isClose ? runner : null,
+    subtitle: resultSubtitle,
+    story: personaStories[winner.id] || winner.subtitle,
+    dimensions,
+    tags: topTags,
+    shareText: refs.shareText.textContent,
+  };
 }
 
 function getDimensionStats() {
@@ -1379,8 +1391,8 @@ function getDimensionStats() {
   }));
 }
 
-function renderDimensionStats() {
-  return getDimensionStats()
+function renderDimensionStats(stats = getDimensionStats()) {
+  return stats
     .map(
       (item) => `
         <div class="dimension-row">
@@ -1441,6 +1453,7 @@ function resetQuiz() {
   state.scores = {};
   state.answers = [];
   state.pendingQuestions = [];
+  state.result = null;
   document.body.removeAttribute("data-persona-group");
   refs.questionCard.hidden = false;
   refs.resultPanel.hidden = true;
@@ -1474,74 +1487,144 @@ async function copyResult() {
 }
 
 async function createResultScreenshot() {
-  const rect = refs.resultPanel.getBoundingClientRect();
-  const width = Math.ceil(rect.width);
-  const height = Math.ceil(refs.resultPanel.scrollHeight);
-  const clone = refs.resultPanel.cloneNode(true);
-  clone.hidden = false;
-  clone.style.width = `${width}px`;
-  clone.style.boxSizing = "border-box";
-  clone.querySelector(".action-row")?.remove();
-
-  const styles = Array.from(document.styleSheets)
-    .map((sheet) => {
-      try {
-        return Array.from(sheet.cssRules).map((rule) => rule.cssText).join("\n");
-      } catch {
-        return "";
-      }
-    })
-    .join("\n");
-
-  const html = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-      <foreignObject width="100%" height="100%">
-        <div xmlns="http://www.w3.org/1999/xhtml">
-          <style>
-            ${styles}
-            body { margin: 0; background: #f7f5f1; }
-            .result-panel { box-shadow: none; margin: 0; }
-          </style>
-          ${clone.outerHTML}
-        </div>
-      </foreignObject>
-    </svg>
-  `;
-
-  const svgBlob = new Blob([html], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-  try {
-    const image = await loadImage(url);
-    const scale = Math.min(window.devicePixelRatio || 1, 2);
-    const canvas = document.createElement("canvas");
-    canvas.width = width * scale;
-    canvas.height = height * scale;
-    const context = canvas.getContext("2d");
-    context.fillStyle = "#f7f5f1";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.scale(scale, scale);
-    context.drawImage(image, 0, 0);
-    return await new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error("Canvas export failed"));
-        }
-      }, "image/png");
-    });
-  } finally {
-    URL.revokeObjectURL(url);
+  if (!state.result) {
+    throw new Error("No result to share");
   }
+  const width = 1080;
+  const padding = 72;
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  const subtitleLines = wrapCanvasText(context, state.result.subtitle, width - padding * 2, 32);
+  const storyLines = wrapCanvasText(context, state.result.story, width - padding * 2, 30).slice(0, 8);
+  const height = 840 + subtitleLines.length * 42 + storyLines.length * 40 + state.result.dimensions.length * 58;
+  const scale = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  context.scale(scale, scale);
+
+  drawRoundedRect(context, 0, 0, width, height, 0, "#f7f5f1");
+  drawRoundedRect(context, 36, 36, width - 72, height - 72, 34, "#ffffff");
+
+  let y = 92;
+  context.fillStyle = "#4f8f4d";
+  context.font = "900 30px Arial, sans-serif";
+  context.fillText("TABLETOP GAMER TYPE INDICATOR", padding, y);
+
+  y += 92;
+  context.fillStyle = "#232323";
+  context.font = "900 76px Arial, sans-serif";
+  context.fillText(state.result.winner.name, padding, y);
+  const nameWidth = context.measureText(state.result.winner.name).width;
+  context.fillStyle = "#4f8f4d";
+  context.font = "900 44px Arial, sans-serif";
+  context.fillText(state.result.winner.id, padding + nameWidth + 24, y - 8);
+
+  y += 58;
+  context.fillStyle = "#5f5a66";
+  context.font = "700 32px Arial, sans-serif";
+  subtitleLines.forEach((line) => {
+    context.fillText(line, padding, y);
+    y += 42;
+  });
+
+  y += 20;
+  drawSectionTitle(context, "维度占比", padding, y);
+  y += 34;
+  state.result.dimensions.forEach((dimension) => {
+    context.fillStyle = "#34323a";
+    context.font = "800 28px Arial, sans-serif";
+    context.fillText(dimension.name, padding, y);
+    context.fillStyle = "#4f8f4d";
+    context.textAlign = "right";
+    context.fillText(`${dimension.percent}%`, width - padding, y);
+    context.textAlign = "left";
+    y += 16;
+    drawRoundedRect(context, padding, y, width - padding * 2, 16, 8, "#e7e2e9");
+    drawRoundedRect(context, padding, y, ((width - padding * 2) * dimension.percent) / 100, 16, 8, "#4f8f4d");
+    y += 42;
+  });
+
+  y += 20;
+  drawSectionTitle(context, "人格小传", padding, y);
+  y += 38;
+  context.fillStyle = "#3d3940";
+  context.font = "700 30px Arial, sans-serif";
+  storyLines.forEach((line) => {
+    context.fillText(line, padding, y);
+    y += 40;
+  });
+
+  y += 26;
+  drawSectionTitle(context, "风味标签", padding, y);
+  y += 36;
+  let x = padding;
+  state.result.tags.forEach((tag) => {
+    context.font = "900 26px Arial, sans-serif";
+    const chipWidth = context.measureText(tag).width + 34;
+    if (x + chipWidth > width - padding) {
+      x = padding;
+      y += 48;
+    }
+    drawRoundedRect(context, x, y - 28, chipWidth, 38, 19, "#eaf5e8");
+    context.fillStyle = "#3f6c3c";
+    context.fillText(tag, x + 17, y);
+    x += chipWidth + 12;
+  });
+
+  context.fillStyle = "#8a8490";
+  context.font = "700 24px Arial, sans-serif";
+  context.fillText("生成自 TGTI 桌游人格测试", padding, height - 82);
+
+  return await new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("Canvas export failed"));
+      }
+    }, "image/png");
+  });
 }
 
-function loadImage(url) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = url;
+function wrapCanvasText(context, text, maxWidth, fontSize) {
+  context.font = `700 ${fontSize}px Arial, sans-serif`;
+  const lines = [];
+  let current = "";
+  Array.from(text).forEach((char) => {
+    const next = current + char;
+    if (context.measureText(next).width > maxWidth && current) {
+      lines.push(current);
+      current = char;
+    } else {
+      current = next;
+    }
   });
+  if (current) {
+    lines.push(current);
+  }
+  return lines;
+}
+
+function drawSectionTitle(context, text, x, y) {
+  context.fillStyle = "#4f8f4d";
+  context.font = "900 30px Arial, sans-serif";
+  context.fillText(text, x, y);
+}
+
+function drawRoundedRect(context, x, y, width, height, radius, fillStyle) {
+  context.fillStyle = fillStyle;
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.lineTo(x + width - radius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radius);
+  context.lineTo(x + width, y + height - radius);
+  context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  context.lineTo(x + radius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radius);
+  context.lineTo(x, y + radius);
+  context.quadraticCurveTo(x, y, x + radius, y);
+  context.closePath();
+  context.fill();
 }
 
 function downloadBlob(blob, filename) {
