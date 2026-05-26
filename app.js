@@ -1166,6 +1166,9 @@ const refs = {
   overviewOverlay: document.querySelector("#overviewOverlay"),
   closeOverviewButton: document.querySelector("#closeOverviewButton"),
   overviewGrid: document.querySelector("#overviewGrid"),
+  shareOverlay: document.querySelector("#shareOverlay"),
+  closeShareButton: document.querySelector("#closeShareButton"),
+  sharePreviewImage: document.querySelector("#sharePreviewImage"),
 };
 
 function o(text, scores, followUpId) {
@@ -1466,10 +1469,11 @@ function resetQuiz() {
 async function copyResult() {
   const originalText = refs.copyButton.textContent;
   refs.copyButton.textContent = "生成图片中";
+  let previewUrl = "";
   try {
     const blob = await createResultScreenshot();
     const file = new File([blob], "tgti-result.png", { type: "image/png" });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    if (!isWeChatBrowser() && navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
         title: "我的 TGTI 桌游人格",
@@ -1477,8 +1481,9 @@ async function copyResult() {
       });
       refs.copyButton.textContent = "已唤起分享";
     } else {
-      downloadBlob(blob, "tgti-result.png");
-      refs.copyButton.textContent = "已下载图片";
+      previewUrl = URL.createObjectURL(blob);
+      openSharePreview(previewUrl);
+      refs.copyButton.textContent = "已生成图片";
     }
   } catch (error) {
     refs.copyButton.textContent = "分享不可用";
@@ -1487,6 +1492,28 @@ async function copyResult() {
       refs.copyButton.textContent = originalText;
     }, 1600);
   }
+}
+
+function isWeChatBrowser() {
+  return /MicroMessenger/i.test(navigator.userAgent);
+}
+
+function openSharePreview(url) {
+  if (refs.sharePreviewImage.src && refs.sharePreviewImage.src.startsWith("blob:")) {
+    URL.revokeObjectURL(refs.sharePreviewImage.src);
+  }
+  refs.sharePreviewImage.src = url;
+  refs.shareOverlay.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeSharePreview() {
+  if (refs.sharePreviewImage.src && refs.sharePreviewImage.src.startsWith("blob:")) {
+    URL.revokeObjectURL(refs.sharePreviewImage.src);
+  }
+  refs.sharePreviewImage.removeAttribute("src");
+  refs.shareOverlay.hidden = true;
+  document.body.classList.remove("modal-open");
 }
 
 async function createResultScreenshot() {
@@ -1675,14 +1702,23 @@ refs.restartButton.addEventListener("click", resetQuiz);
 refs.copyButton.addEventListener("click", copyResult);
 refs.overviewButton.addEventListener("click", openOverview);
 refs.closeOverviewButton.addEventListener("click", closeOverview);
+refs.closeShareButton.addEventListener("click", closeSharePreview);
 refs.overviewOverlay.addEventListener("click", (event) => {
   if (event.target === refs.overviewOverlay) {
     closeOverview();
   }
 });
+refs.shareOverlay.addEventListener("click", (event) => {
+  if (event.target === refs.shareOverlay) {
+    closeSharePreview();
+  }
+});
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !refs.overviewOverlay.hidden) {
     closeOverview();
+  }
+  if (event.key === "Escape" && !refs.shareOverlay.hidden) {
+    closeSharePreview();
   }
 });
 
