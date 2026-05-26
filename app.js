@@ -1373,6 +1373,9 @@ function showResult() {
     runner: isClose ? runner : null,
     subtitle: resultSubtitle,
     story: personaStories[winner.id] || winner.subtitle,
+    symptoms: winner.symptoms,
+    guide: winner.guide,
+    danger: winner.danger,
     dimensions,
     tags: topTags,
     shareText: refs.shareText.textContent,
@@ -1478,7 +1481,7 @@ async function copyResult() {
       refs.copyButton.textContent = "已下载图片";
     }
   } catch (error) {
-    refs.copyButton.textContent = "生成失败";
+    refs.copyButton.textContent = "分享不可用";
   } finally {
     setTimeout(() => {
       refs.copyButton.textContent = originalText;
@@ -1495,8 +1498,17 @@ async function createResultScreenshot() {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   const subtitleLines = wrapCanvasText(context, state.result.subtitle, width - padding * 2, 32);
-  const storyLines = wrapCanvasText(context, state.result.story, width - padding * 2, 30).slice(0, 8);
-  const height = 840 + subtitleLines.length * 42 + storyLines.length * 40 + state.result.dimensions.length * 58;
+  const storyLines = wrapCanvasText(context, state.result.story, width - padding * 2, 30).slice(0, 6);
+  const symptomLines = state.result.symptoms.flatMap((item) => wrapCanvasText(context, `- ${item}`, width - padding * 2, 28));
+  const guideLines = wrapCanvasText(context, state.result.guide, width - padding * 2, 28).slice(0, 3);
+  const dangerLines = wrapCanvasText(context, state.result.danger, width - padding * 2, 28).slice(0, 3);
+  const height = 980
+    + subtitleLines.length * 42
+    + storyLines.length * 40
+    + symptomLines.length * 36
+    + guideLines.length * 36
+    + dangerLines.length * 36
+    + state.result.dimensions.length * 58;
   const scale = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = width * scale;
   canvas.height = height * scale;
@@ -1554,6 +1566,16 @@ async function createResultScreenshot() {
     y += 40;
   });
 
+  y += 24;
+  drawTextBlock(context, "桌面症状", symptomLines, padding, y, 28);
+  y += 46 + symptomLines.length * 36;
+
+  drawTextBlock(context, "队友说明书", guideLines, padding, y, 28);
+  y += 46 + guideLines.length * 36;
+
+  drawTextBlock(context, "雷区提醒", dangerLines, padding, y, 28);
+  y += 46 + dangerLines.length * 36;
+
   y += 26;
   drawSectionTitle(context, "风味标签", padding, y);
   y += 36;
@@ -1609,6 +1631,17 @@ function drawSectionTitle(context, text, x, y) {
   context.fillStyle = "#4f8f4d";
   context.font = "900 30px Arial, sans-serif";
   context.fillText(text, x, y);
+}
+
+function drawTextBlock(context, title, lines, x, y, fontSize) {
+  drawSectionTitle(context, title, x, y);
+  context.fillStyle = "#3d3940";
+  context.font = `700 ${fontSize}px Arial, sans-serif`;
+  let nextY = y + 38;
+  lines.forEach((line) => {
+    context.fillText(line, x, nextY);
+    nextY += 36;
+  });
 }
 
 function drawRoundedRect(context, x, y, width, height, radius, fillStyle) {
