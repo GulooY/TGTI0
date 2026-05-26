@@ -1448,19 +1448,111 @@ function resetQuiz() {
 }
 
 async function copyResult() {
-  const text = refs.shareText.textContent;
+  const originalText = refs.copyButton.textContent;
+  refs.copyButton.textContent = "生成图片中";
   try {
-    await navigator.clipboard.writeText(text);
-    refs.copyButton.textContent = "已复制";
+    const blob = await createResultScreenshot();
+    const file = new File([blob], "tgti-result.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "我的 TGTI 桌游人格",
+        text: refs.shareText.textContent,
+      });
+      refs.copyButton.textContent = "已唤起分享";
+    } else {
+      downloadBlob(blob, "tgti-result.png");
+      refs.copyButton.textContent = "已下载图片";
+    }
+  } catch (error) {
+    refs.copyButton.textContent = "生成失败";
+  } finally {
     setTimeout(() => {
-      refs.copyButton.textContent = "复制结果";
-    }, 1400);
-  } catch {
-    refs.copyButton.textContent = "复制失败";
-    setTimeout(() => {
-      refs.copyButton.textContent = "复制结果";
-    }, 1400);
+      refs.copyButton.textContent = originalText;
+    }, 1600);
   }
+}
+
+async function createResultScreenshot() {
+  const rect = refs.resultPanel.getBoundingClientRect();
+  const width = Math.ceil(rect.width);
+  const height = Math.ceil(refs.resultPanel.scrollHeight);
+  const clone = refs.resultPanel.cloneNode(true);
+  clone.hidden = false;
+  clone.style.width = `${width}px`;
+  clone.style.boxSizing = "border-box";
+  clone.querySelector(".action-row")?.remove();
+
+  const styles = Array.from(document.styleSheets)
+    .map((sheet) => {
+      try {
+        return Array.from(sheet.cssRules).map((rule) => rule.cssText).join("\n");
+      } catch {
+        return "";
+      }
+    })
+    .join("\n");
+
+  const html = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+      <foreignObject width="100%" height="100%">
+        <div xmlns="http://www.w3.org/1999/xhtml">
+          <style>
+            ${styles}
+            body { margin: 0; background: #f7f5f1; }
+            .result-panel { box-shadow: none; margin: 0; }
+          </style>
+          ${clone.outerHTML}
+        </div>
+      </foreignObject>
+    </svg>
+  `;
+
+  const svgBlob = new Blob([html], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+  try {
+    const image = await loadImage(url);
+    const scale = Math.min(window.devicePixelRatio || 1, 2);
+    const canvas = document.createElement("canvas");
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#f7f5f1";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.scale(scale, scale);
+    context.drawImage(image, 0, 0);
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("Canvas export failed"));
+        }
+      }, "image/png");
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = url;
+  });
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 refs.restartButton.addEventListener("click", resetQuiz);
